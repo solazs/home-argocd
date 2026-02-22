@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-server-ingress
+  namespace: argocd
+  annotations:
+    kubernetes.io/ingress.class: cilium
+    cert-manager.io/cluster-issuer: "cloudflare-letsencrypt-staging"
+    ingress.cilium.io/force-https: "true"
+spec:
+  tls:
+  - hosts:
+    - argocd.yourdomain.com
+    secretName: argocd-server-tls
+  rules:
+  - host: argocd.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: argocd-server
+            port:
+              # Cilium 1.18 will see the 'http' port in the service 
+              # and know to talk to the backend without encryption.
+              name: http
