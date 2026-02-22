@@ -18,8 +18,7 @@ spec:
         driver:
           existingConfigSecret: democratic-csi-driver-config
           config:
-            # Helm needs this strictly for its templating logic!
-            driver: zfs-generic-nfs
+            driver: "zfs-generic-nfs"
   destination:
     server: "https://kubernetes.default.svc"
     namespace: kube-system
