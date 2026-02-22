@@ -16,10 +16,10 @@ spec:
         csiDriver:
           name: "org.democratic-csi.nfs"
         driver:
-          # Tell Helm to use the secret created by Ansible
           existingConfigSecret: democratic-csi-driver-config
-          # We pass an empty config block so Helm doesn't try to generate one
-          config: {}
+          config:
+            # Helm needs this strictly for its templating logic!
+            driver: zfs-generic-nfs
   destination:
     server: "https://kubernetes.default.svc"
     namespace: kube-system
