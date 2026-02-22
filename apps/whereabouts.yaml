@@ -62,7 +62,7 @@ items:
           serviceAccountName: whereabouts
           containers:
             - name: whereabouts
-              image: ghcr.io/k8snetworkplumbingwg/whereabouts:v0.6.1
+              image: ghcr.io/k8snetworkplumbingwg/whereabouts:v0.9.3
               command: ["/bin/sh", "-c", "sleep infinity"]
               volumeMounts:
                 - name: cni-bin
