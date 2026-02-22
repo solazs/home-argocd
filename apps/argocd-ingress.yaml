@@ -5,7 +5,7 @@ metadata:
   namespace: argocd
   ingressClassName: cilium
   annotations:
-    cert-manager.io/cluster-issuer: "cloudflare-letsencrypt-staging"
+    # cert-manager.io/cluster-issuer: "cloudflare-letsencrypt-staging"
     ingress.cilium.io/force-https: "true"
     argocd.argoproj.io/sync-wave: "3"
 spec:
