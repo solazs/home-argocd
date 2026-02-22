@@ -1,0 +1,20 @@
+apiVersion: "cilium.io/v2alpha1"
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: "home-network-pool"
+spec:
+  blocks:
+    - cidr: "192.168.13.233/29"
+---
+apiVersion: "cilium.io/v2alpha1"
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: "home-l2-policy"
+spec:
+  externalIPs: true
+  loadBalancerIPs: true
+  interfaces:
+    - ^vlan13-home$
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/os: linux
