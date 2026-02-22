@@ -9,6 +9,9 @@ metadata:
     ingress.cilium.io/force-https: "true"
     argocd.argoproj.io/sync-wave: "3"
 spec:
+  syncPolicy:
+    syncOptions:
+      - SkipDryRunOnMissingResource=true
   tls:
     - hosts:
         - argocd.home.solazs.hu
