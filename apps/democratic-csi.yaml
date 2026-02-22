@@ -16,31 +16,10 @@ spec:
         csiDriver:
           name: "org.democratic-csi.nfs"
         driver:
-          config:
-            driver: zfs-generic-nfs
-            zfs:
-              cli:
-                sudoEnabled: true
-              datasetParentName: logos/k8s/vols
-              detachedSnapshotsDatasetParentName: logos/k8s/snapshots
-              datasetEnableQuotas: true
-              datasetEnableReservation: false
-              datasetPermissionsMode: "0777"
-              datasetPermissionsUser: 0
-              datasetPermissionsGroup: 0
-            sshConnection:
-              host: 192.168.13.100
-              port: 62222
-              username: k8s
-              privateKeySecretRef:
-                name: democratic-csi-ssh-key
-                key: private-key
-            nfs:
-              shareHost: 192.168.13.100
-              shareStrategy: "setDatasetProperties"
-              shareStrategySetDatasetProperties:
-                properties:
-                  sharenfs: "rw=@192.168.13.0/24,no_root_squash,no_subtree_check"
+          # Tell Helm to use the secret created by Ansible
+          existingConfigSecret: democratic-csi-driver-config
+          # We pass an empty config block so Helm doesn't try to generate one
+          config: {}
   destination:
     server: "https://kubernetes.default.svc"
     namespace: kube-system
