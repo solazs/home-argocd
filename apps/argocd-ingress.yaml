@@ -9,19 +9,19 @@ metadata:
     ingress.cilium.io/force-https: "true"
 spec:
   tls:
-  - hosts:
-    - argocd.yourdomain.com
-    secretName: argocd-server-tls
+    - hosts:
+        - argocd.home.solazs.hu
+      secretName: argocd-server-tls
   rules:
-  - host: argocd.yourdomain.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: argocd-server
-            port:
-              # Cilium 1.18 will see the 'http' port in the service 
-              # and know to talk to the backend without encryption.
-              name: http
+    - host: argocd.home.solazs.hu
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  # Cilium 1.18 will see the 'http' port in the service
+                  # and know to talk to the backend without encryption.
+                  name: http
