@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: "https://backend.gateway.envoyproxy.io"
+    repoURL: "oci://docker.io/envoyproxy"
     chart: gateway-helm
     targetRevision: v1.7.0
   destination:
