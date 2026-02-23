@@ -34,7 +34,7 @@ metadata:
   name: envoy-gateway
 spec:
   controllerName: gateway.envoyproxy.io/gatewayclass-controller
-parametersRef:
+  parametersRef:
     group: gateway.envoyproxy.io
     kind: EnvoyProxy
     name: custom-proxy-config

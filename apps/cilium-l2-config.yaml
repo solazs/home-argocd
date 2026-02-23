@@ -13,7 +13,6 @@ metadata:
 spec:
   interfaces:
     - "^vlan13-home$"
-  externalTrafficPolicy: Cluster
   loadBalancerIPs: true
   serviceSelector:
     matchLabels:
