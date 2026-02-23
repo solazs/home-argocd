@@ -6,6 +6,9 @@ metadata:
   annotations:
     io.cilium/lb-ipam-ips: "192.168.13.233"
     cert-manager.io/cluster-issuer: "cloudflare-letsencrypt-production"
+    io.cilium/l2-announcer: "true"
+  labels:
+    app.kubernetes.io/name: envoy
 spec:
   gatewayClassName: envoy-gateway
   listeners:

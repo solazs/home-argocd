@@ -9,13 +9,13 @@ spec:
 apiVersion: "cilium.io/v2alpha1"
 kind: CiliumL2AnnouncementPolicy
 metadata:
-  name: "home-l2-policy"
+  name: vlan13-announcement-policy
 spec:
-  externalIPs: true
+  interfaces:
+    - "^vlan13-home$"
   externalTrafficPolicy: Cluster
   loadBalancerIPs: true
-  interfaces:
-    - ^vlan13-home$
   serviceSelector:
     matchLabels:
+      # This targets the Envoy proxy pods specifically
       app.kubernetes.io/name: envoy
