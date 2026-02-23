@@ -12,9 +12,10 @@ metadata:
   name: "home-l2-policy"
 spec:
   externalIPs: true
+  externalTrafficPolicy: Cluster
   loadBalancerIPs: true
   interfaces:
     - ^vlan13-home$
-  nodeSelector:
+  serviceSelector:
     matchLabels:
-      kubernetes.io/os: linux
+      app.kubernetes.io/name: envoy
