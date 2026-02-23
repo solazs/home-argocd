@@ -6,8 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: oci://registry.k8s.io/nfd/charts
-    path: .
+    repoURL: oci://registry.k8s.io/nfd
     chart: node-feature-discovery
     targetRevision: 0.18.3
   destination:
