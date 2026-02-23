@@ -6,8 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: oci://registry.k8s.io
-    chart: nfd/charts/node-feature-discovery
+    chart: oci://registry.k8s.io/nfd/charts/node-feature-discovery
     targetRevision: 0.18.3
   destination:
     server: https://kubernetes.default.svc
