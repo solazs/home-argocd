@@ -13,6 +13,8 @@ spec:
       # Use values instead of parameters for cleaner config
       values: |
         installCRDs: true
+        config:
+          enableGatewayAPI: true
         extraArgs:
           - --dns01-recursive-nameservers-only
           - --dns01-recursive-nameservers=1.1.1.1:53,8.8.8.8:53
