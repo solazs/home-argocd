@@ -41,8 +41,8 @@ spec:
         sources:
           - ingress
           - service
-          - gateway    # Now supported by RBAC above
-          - httproute  # Now supported by RBAC above
+          - gateway-httproute
+          - gateway-grpcroute
           
         domainFilters:
           - home.solazs.hu
