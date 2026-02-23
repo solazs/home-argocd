@@ -1,0 +1,22 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: home-gateway
+  namespace: envoy-gateway-system
+  annotations:
+    io.cilium/lb-ipam-ips: "192.168.13.233"
+    cert-manager.io/cluster-issuer: "cloudflare-letsencrypt-staging"
+spec:
+  gatewayClassName: envoy-gateway
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "argocd.home.solazs.hu"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: argocd-server-tls
+      allowedRoutes:
+        namespaces:
+          from: All
