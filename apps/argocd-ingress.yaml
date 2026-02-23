@@ -8,6 +8,17 @@ metadata:
     cert-manager.io/cluster-issuer: "cloudflare-letsencrypt-staging"
     ingress.cilium.io/force-https: "true"
 spec:
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5 # Number of failed sync attempts to retry
+      backoff:
+        duration: 20s # Initial backoff duration
+        factor: 2 # Factor to multiply the base duration
+        maxDuration: 3m0s # Maximum backoff duration
+
   tls:
     - hosts:
         - argocd.home.solazs.hu
