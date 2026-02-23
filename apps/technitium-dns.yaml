@@ -16,12 +16,19 @@ spec:
         provider:
           name: rfc2136
 
-        # Pull the TSIG secret securely from the Ansible-created Secret
+        # Step 4: Add permissions for the Gateway API resources
+        rbac:
+          create: true
+          additionalPermissions:
+            - apiGroups: ["gateway.networking.k8s.io"]
+              resources: ["gateways", "httproutes"]
+              verbs: ["get", "watch", "list"]
+
         env:
           - name: EXTERNAL_DNS_RFC2136_TSIG_SECRET
             valueFrom:
               secretKeyRef:
-                name: external-dns-tsig
+                name: external-dns-tsig # Ensure this secret is moved to 'external-dns' namespace!
                 key: tsig-secret
                 
         extraArgs:
@@ -31,24 +38,23 @@ spec:
           - --rfc2136-tsig-secret-alg=hmac-sha256
           - --rfc2136-tsig-keyname=k8s
           
-        # Tell ExternalDNS to watch Ingresses (which Cilium manages) and Services
         sources:
           - ingress
           - service
+          - gateway    # Now supported by RBAC above
+          - httproute  # Now supported by RBAC above
           
-        # Restrict ExternalDNS to only modify records in this specific zone
         domainFilters:
           - home.solazs.hu
           
-        # Prevent ExternalDNS from deleting records it didn't create
         policy: sync
-
-        # Add TXT registry to keep track of which records ExternalDNS owns
         txtOwnerId: "k8s-cluster"
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: kube-system
+    namespace: external-dns # New home for the app
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true # Ensures the namespace exists before deploy
