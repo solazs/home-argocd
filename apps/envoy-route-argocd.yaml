@@ -17,26 +17,3 @@ spec:
       backendRefs:
         - name: argocd-server
           port: 80
----
-apiVersion: gateway.envoyproxy.io/v1alpha1
-kind: BackendTrafficPolicy
-metadata:
-  name: argocd-retry-policy
-  namespace: argocd
-spec:
-  targetRefs:
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      name: argocd-server-route
-  retry:
-    numRetries: 5
-    perRetry:
-      backOff:
-        baseInterval: 200ms
-        maxInterval: 2s
-      timeout: 5s # Wait 5s for the backend to respond per try
-    retryOn:
-      # This specifically handles the 'Connection Reset' you saw earlier
-      reset: true
-      gatewayError: true # 502, 503, 504
-      connectFailure: true
