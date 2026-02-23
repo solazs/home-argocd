@@ -6,6 +6,14 @@ metadata:
 spec:
   project: default
   source:
+    # helm: Customize values like this
+    #   valuesObject:
+    #     deployment:
+    #       envoyGateway:
+    #         resources:
+    #           limits:
+    #             cpu: 700m
+    #             memory: 256Mi
     chart: gateway-helm
     repoURL: docker.io/envoyproxy
     targetRevision: v0.0.0-latest
