@@ -51,7 +51,7 @@ spec:
     chart: frigate
     helm:
       values: |
-        image
+        image:
           tag: "0.17.0-rc3"
         # Multus network annotations to attach the secondary interfaces with STATIC MACs
         podAnnotations:
