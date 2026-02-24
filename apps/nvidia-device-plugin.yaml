@@ -17,6 +17,8 @@ spec:
           value: "true"
         - name: nfd.enabled
           value: "false"
+        - name: deviceDiscoveryStrategy
+          value: "nvml"
   destination:
     server: https://kubernetes.default.svc
     namespace: nvidia-device-plugin
