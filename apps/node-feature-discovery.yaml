@@ -9,6 +9,23 @@ spec:
     repoURL: https://kubernetes-sigs.github.io/node-feature-discovery/charts
     chart: node-feature-discovery
     targetRevision: 0.18.3
+    helm:
+      values: |
+        master:
+          extraLabelNs:
+            - "nvidia.com"
+        worker:
+          config:
+            sources:
+              pci:
+                deviceClassWhitelist:
+                  - "02"
+                  - "0200"
+                  - "0207"
+                  - "0300"
+                  - "0302"
+                deviceLabelFields:
+                  - "vendor"
   destination:
     server: https://kubernetes.default.svc
     namespace: node-feature-discovery
