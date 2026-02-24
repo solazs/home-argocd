@@ -1,15 +1,19 @@
+# Intel NPU Device Plugin via Helm
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: intel-device-plugins-operator
+  name: intel-device-plugins-npu
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://intel.github.io/helm-charts/
     path: intel
-    chart: intel-device-plugins-operator
-    targetRevision: 0.35.0
+    chart: intel-device-plugins-npu
+    targetRevision: 0.35.0 # Set to desired version
+    helm:
+      valueFiles:
+        - values.yaml # Place your custom values.yaml in the same app directory or configure as needed
   destination:
     server: https://kubernetes.default.svc
     namespace: intel-device-plugins-system
