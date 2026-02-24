@@ -1,4 +1,3 @@
----
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -17,6 +16,33 @@ spec:
         fullnameOverride: democratic-csi-logos
         csiDriver:
           name: "org.democratic-csi.nfs-logos"
+          
+        storageClasses:
+          # 1. Logos Standard (The Cluster Default)
+          - name: democratic-csi-logos-nfs
+            defaultClass: true
+            reclaimPolicy: Retain
+            volumeBindingMode: Immediate
+            allowVolumeExpansion: true
+            parameters:
+              fsType: nfs
+            mountOptions:
+              - noatime
+              - nfsvers=4.2
+              
+          # 2. Logos Media (Optimized for large files like Frigate)
+          - name: democratic-csi-logos-nfs-media
+            defaultClass: false
+            reclaimPolicy: Retain
+            volumeBindingMode: Immediate
+            allowVolumeExpansion: true
+            parameters:
+              fsType: nfs
+              recordsize: "1M" 
+            mountOptions:
+              - noatime
+              - nfsvers=4.2
+              
         driver:
           existingConfigSecret: democratic-csi-logos-secret
           config:
@@ -50,6 +76,33 @@ spec:
         fullnameOverride: democratic-csi-tavern
         csiDriver:
           name: "org.democratic-csi.nfs-tavern"
+          
+        storageClasses:
+          # 3. Tavern Standard
+          - name: democratic-csi-tavern-nfs
+            defaultClass: false
+            reclaimPolicy: Retain
+            volumeBindingMode: Immediate
+            allowVolumeExpansion: true
+            parameters:
+              fsType: nfs
+            mountOptions:
+              - noatime
+              - nfsvers=4.2
+              
+          # 4. Tavern Media (Optimized for large files)
+          - name: democratic-csi-tavern-nfs-media
+            defaultClass: false
+            reclaimPolicy: Retain
+            volumeBindingMode: Immediate
+            allowVolumeExpansion: true
+            parameters:
+              fsType: nfs
+              recordsize: "1M" 
+            mountOptions:
+              - noatime
+              - nfsvers=4.2
+              
         driver:
           existingConfigSecret: democratic-csi-tavern-secret
           config:

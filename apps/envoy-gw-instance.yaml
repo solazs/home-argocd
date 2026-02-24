@@ -12,7 +12,7 @@ metadata:
 spec:
   gatewayClassName: envoy-gateway
   listeners:
-    - name: https
+    - name: https-argocd
       protocol: HTTPS
       port: 443
       hostname: "argocd.home.solazs.hu"
@@ -20,6 +20,20 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: argocd-server-tls
+            kind: Secret
+            group: ""
+      allowedRoutes:
+        namespaces:
+          from: All
+          
+    - name: https-frigate
+      protocol: HTTPS
+      port: 443
+      hostname: "frigate.home.solazs.hu"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: frigate-server-tls
             kind: Secret
             group: ""
       allowedRoutes:
