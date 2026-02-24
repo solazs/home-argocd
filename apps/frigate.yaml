@@ -81,19 +81,19 @@ spec:
           detectors:
             ov:
               type: openvino
-              device: AUTO
+              device: NPU
 
           # Go2RTC configuration
           go2rtc:
             streams:
               hik_utca:
-                - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.21:554/Streaming/Channels/101
+                - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.101:554/Streaming/Channels/101
               hik_kocsibeallo:
-                - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.22:554/Streaming/Channels/101
+                - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.102:554/Streaming/Channels/101
               hik_kert:
-                - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.23:554/Streaming/Channels/101
+                - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.103:554/Streaming/Channels/101
               dahua_madarak:
-                - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.24:554/cam/realmonitor?channel=1&subtype=0
+                - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.104:554/cam/realmonitor?channel=1&subtype=0
 
           # Global Camera Defaults
           cameras:
