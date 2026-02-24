@@ -1,4 +1,4 @@
-# 1. IoT VLAN Network Attachment
+# IoT VLAN Network Attachment
 apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
@@ -15,7 +15,7 @@ spec:
       }
     }'
 ---
-# 2. Video VLAN Network Attachment
+# Video VLAN Network Attachment
 apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
@@ -37,7 +37,7 @@ spec:
       }
     }'
 ---
-# 3. Updated Frigate ArgoCD Application
+# Frigate ArgoCD Application
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -65,27 +65,85 @@ spec:
               }
             ]
           
-        envFromSecrets:
-          - frigate-mqtt
-          
+        # Map secrets to environment variables for use in the Frigate config
+        envFrom:
+          - secretRef:
+              name: frigate-secrets
+
         config: |
           mqtt:
             host: 192.168.13.200
             port: 1883
             user: frigate
+            # Values in {} are expanded from environment variables
             password: '{FRIGATE_MQTT_PASSWORD}'
+
+          # Detector Configuration (Using OpenVINO for Intel NPU/GPU)
           detectors:
-            cpu:
-              enabled: false
-            coral:
-              enabled: false
-            openvino:
+            ov:
+              type: openvino
+              device: AUTO
+
+          # Go2RTC configuration with environment variable substitution for security
+          go2rtc:
+            streams:
+              hik_utca:
+                - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.21:554/Streaming/Channels/101
+              hik_kocsibeallo:
+                - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.22:554/Streaming/Channels/101
+              hik_kert:
+                - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.23:554/Streaming/Channels/101
+              dahua_madarak:
+                - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.24:554/cam/realmonitor?channel=1&subtype=0
+
+          # Global Camera Defaults
+          cameras:
+            hik_utca:
               enabled: true
-              device: "AUTO"
-            vaapi:
+              ffmpeg:
+                inputs:
+                  - path: rtsp://127.0.0.1:8554/hik_utca
+                    roles: [detect, record]
+            hik_kocsibeallo:
               enabled: true
-              device: "/dev/dri/renderD128"
-              
+              ffmpeg:
+                inputs:
+                  - path: rtsp://127.0.0.1:8554/hik_kocsibeallo
+                    roles: [detect, record]
+            hik_kert:
+              enabled: true
+              ffmpeg:
+                inputs:
+                  - path: rtsp://127.0.0.1:8554/hik_kert
+                    roles: [detect, record]
+            dahua_madarak:
+              enabled: true
+              ffmpeg:
+                inputs:
+                  - path: rtsp://127.0.0.1:8554/dahua_madarak
+                    roles: [detect, record]
+
+          # Shared settings for all cameras
+          camera_defaults:
+            detect:
+              enabled: true
+              width: 1280
+              height: 720
+              fps: 5
+            record:
+              enabled: true
+              retain:
+                days: 7
+                mode: all
+            snapshots:
+              enabled: true
+              retain:
+                default: 14
+
+          # Hardware Acceleration for ffmpeg
+          ffmpeg:
+            hwaccel_args: preset-vaapi
+
         persistence:
           media:
             enabled: true
