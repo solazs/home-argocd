@@ -11,9 +11,12 @@ spec:
     path: nvdp
     chart: nvidia-device-plugin
     targetRevision: 0.18.2
-    # helm:
-    #   valueFiles:
-    #     - values.yaml # Place your custom values.yaml in the same app directory or configure as needed
+    helm:
+      parameters:
+        - name: gfd.enabled
+          value: "true"
+        - name: nfd.enabled
+          value: "false"
   destination:
     server: https://kubernetes.default.svc
     namespace: nvidia-device-plugin
