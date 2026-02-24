@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cni-dhcp-daemon
+  namespace: kube-system
+  labels:
+    app: cni-dhcp-daemon
+spec:
+  selector:
+    matchLabels:
+      app: cni-dhcp-daemon
+  template:
+    metadata:
+      labels:
+        app: cni-dhcp-daemon
+    spec:
+      hostNetwork: true
+      tolerations:
+        - operator: Exists # Allows it to run on all nodes, including control plane if applicable
+      containers:
+        - name: dhcp-daemon
+          image: alpine:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              # Clean up any stale socket
+              rm -f /run/cni/dhcp.sock
+              # Execute the host's CNI DHCP plugin in daemon mode
+              echo "Starting CNI DHCP Daemon..."
+              exec /opt/cni/bin/dhcp daemon
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: cni-bin
+              mountPath: /opt/cni/bin
+              readOnly: true
+            - name: cni-run
+              mountPath: /run/cni
+      volumes:
+        - name: cni-bin
+          hostPath:
+            path: /opt/cni/bin # Default path for CNI plugins
+        - name: cni-run
+          hostPath:
+            path: /run/cni
