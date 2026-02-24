@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gpu-operator
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://helm.ngc.nvidia.com/nvidia
+    chart: gpu-operator
+    targetRevision: v24.6.1
+    helm:
+      values: |
+        nfd:
+          enabled: false
+        toolkit:
+          env:
+            - name: CONTAINERD_CONFIG
+              value: /var/lib/rancher/rke2/agent/etc/containerd/config.toml.tmpl
+            - name: CONTAINERD_SOCKET
+              value: /run/k3s/containerd/containerd.sock
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: nvidia-gpu-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
