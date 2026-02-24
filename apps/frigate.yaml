@@ -158,11 +158,9 @@ spec:
           intel.feature.node.kubernetes.io/npu: "true"# Request the NPU resource so the operator mounts /dev/accel/accel0
         resources:
           requests:
-            intel.com/npu: "1"
-            intel.com/gpu: "1"
+            npu.intel.com/accel: "1"
           limits:
-            intel.com/npu: "1"
-            intel.com/gpu: "1"
+            npu.intel.com/accel: "1"
   destination:
     server: https://kubernetes.default.svc
     namespace: frigate
