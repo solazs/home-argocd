@@ -16,7 +16,7 @@ spec:
     spec:
       hostNetwork: true
       tolerations:
-        - operator: Exists # Allows it to run on all nodes, including control plane if applicable
+        - operator: Exists
       containers:
         - name: dhcp-daemon
           image: alpine:latest
@@ -37,10 +37,16 @@ spec:
               readOnly: true
             - name: cni-run
               mountPath: /run/cni
+            - name: netns
+              mountPath: /var/run/netns
+              mountPropagation: HostToContainer
       volumes:
         - name: cni-bin
           hostPath:
-            path: /opt/cni/bin # Default path for CNI plugins
+            path: /opt/cni/bin
         - name: cni-run
           hostPath:
             path: /run/cni
+        - name: netns
+          hostPath:
+            path: /var/run/netns
