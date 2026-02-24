@@ -10,7 +10,7 @@ spec:
     repoURL: https://nvidia.github.io/k8s-device-plugin
     path: nvdp
     chart: nvidia-device-plugin
-    # targetRevision: 0.18.2
+    targetRevision: 0.18.2
     # helm:
     #   valueFiles:
     #     - values.yaml # Place your custom values.yaml in the same app directory or configure as needed
