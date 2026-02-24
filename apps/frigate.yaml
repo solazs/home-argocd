@@ -1,3 +1,43 @@
+# 1. IoT VLAN Network Attachment
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: vlan12-iot
+  namespace: frigate
+spec:
+  config: '{
+      "cniVersion": "0.3.1",
+      "type": "macvlan",
+      "master": "vlan12-iot",
+      "mode": "bridge",
+      "ipam": {
+        "type": "dhcp" 
+      }
+    }'
+---
+# 2. Video VLAN Network Attachment
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: vlan55-video
+  namespace: frigate
+spec:
+  config: '{
+      "cniVersion": "0.3.1",
+      "type": "macvlan",
+      "master": "vlan55-video",
+      "mode": "bridge",
+      "ipam": {
+        "type": "static",
+        "addresses": [
+          {
+            "address": "192.168.55.150/24"
+          }
+        ]
+      }
+    }'
+---
+# 3. Updated Frigate ArgoCD Application
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -11,8 +51,20 @@ spec:
     chart: frigate
     helm:
       values: |
-        # Ingress is handled externally by Envoy Gateway HTTPRoute, so no ingress block here.
-        
+        # Multus network annotations to attach the secondary interfaces with STATIC MACs
+        podAnnotations:
+          k8s.v1.cni.cncf.io/networks: |-
+            [
+              {
+                "name": "vlan12-iot",
+                "mac": "02:F8:16:A7:E0:12" 
+              },
+              {
+                "name": "vlan55-video",
+                "mac": "02:F8:16:A7:E0:55"
+              }
+            ]
+          
         envFromSecrets:
           - frigate-mqtt
           
@@ -37,13 +89,11 @@ spec:
         persistence:
           media:
             enabled: true
-            # Pointing directly to the Logos StorageClass we just defined
-            storageClass: democratic-csi-logos-nfs
+            storageClass: democratic-csi-logos-nfs-media
             size: 1Ti
           config:
             enabled: true
-            # Pointing directly to the Logos StorageClass we just defined
-            storageClass: democratic-csi-logos-nfs
+            storageClass: democratic-csi-logos-nfs-media
             size: 1Gi
             
         tolerations:
@@ -65,23 +115,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: frigate-route
-  namespace: frigate
-spec:
-  parentRefs:
-    - name: home-gateway
-      namespace: envoy-gateway-system
-  hostnames:
-    - "frigate.home.solazs.hu"
-  rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
-      backendRefs:
-        - name: frigate
-          port: 5000
