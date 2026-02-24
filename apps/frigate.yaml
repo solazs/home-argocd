@@ -66,9 +66,8 @@ spec:
             ]
           
         # Map secrets to environment variables for use in the Frigate config
-        envFrom:
-          - secretRef:
-              name: frigate-secrets
+        envFromSecrets:
+          - frigate-secrets
 
         config: |
           mqtt:
