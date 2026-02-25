@@ -80,6 +80,16 @@ spec:
         ffmpeg:
           hwaccel_args: preset-vaapi
 
+        service:
+          main:
+            ports:
+              http:
+                port: 5000
+              rtsp:
+                enabled: true
+                port: 8554
+                protocol: TCP
+
         persistence:
           media:
             enabled: true
@@ -136,3 +146,19 @@ spec:
       backendRefs:
         - name: frigate
           port: 5000
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: frigate-rtsp-route
+  namespace: frigate
+spec:
+  parentRefs:
+    - name: home-gateway
+      namespace: envoy-gateway-system
+      sectionName: rtsp-listener # Must match the listener name in your Gateway
+  rules:
+    - backendRefs:
+        - name: frigate
+          port: 8554
+

@@ -39,3 +39,10 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+ 
+    - name: rtsp-listener
+      protocol: TCP
+      port: 8554
+      allowedRoutes:
+        namespaces:
+          from: All # Allows your TCPRoute in the argocd/frigate namespace to attach to it
