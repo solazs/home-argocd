@@ -156,7 +156,7 @@ spec:
         nodeSelector:
           intel.feature.node.kubernetes.io/gpu: "true"
           intel.feature.node.kubernetes.io/npu: "true"# Request the NPU resource so the operator mounts /dev/accel/accel0
-        resources:resources:
+        resources:
           requests:
             npu.intel.com/accel: "1"
             gpu.intel.com/i915: "1"
