@@ -11,7 +11,12 @@ spec:
       "master": "vlan12-iot",
       "mode": "bridge",
       "ipam": {
-        "type": "dhcp" 
+        "type": "static",
+        "addresses": [
+          {
+            "address": "192.168.12.151/24" 
+          }
+        ]
       }
     }'
 ---
