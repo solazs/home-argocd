@@ -80,15 +80,15 @@ spec:
         ffmpeg:
           hwaccel_args: preset-vaapi
 
-        service:
-          main:
-            ports:
-              http:
-                port: 5000
-              rtsp:
-                enabled: true
-                port: 8554
-                protocol: TCP
+#        service:
+#          main:
+#            ports:
+#              http:
+#                port: 5000
+#              rtsp:
+#                enabled: true
+#                port: 8554
+#                protocol: TCP
 
         persistence:
           media:
