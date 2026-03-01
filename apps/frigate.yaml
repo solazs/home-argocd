@@ -136,16 +136,13 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: democratic-csi-logos-nfs-media
+  storageClassName: ""
   mountOptions:
     - noatime
     - nfsvers=4.2
-  csi:
-    driver: org.democratic-csi.nfs-logos
-    volumeHandle: logos/frigate/media
-    volumeAttributes:
-      server: 192.168.13.100
-      share: /logos/frigate/media
+  nfs:
+    server: 192.168.13.100
+    path: /logos/frigate/media
   claimRef:
     namespace: frigate
     name: frigate-media
@@ -161,16 +158,13 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: democratic-csi-logos-nfs-media
+  storageClassName: ""
   mountOptions:
     - noatime
     - nfsvers=4.2
-  csi:
-    driver: org.democratic-csi.nfs-logos
-    volumeHandle: logos/frigate/config
-    volumeAttributes:
-      server: 192.168.13.100
-      share: /logos/frigate/config
+  nfs:
+    server: 192.168.13.100
+    path: /logos/frigate/config
   claimRef:
     namespace: frigate
     name: frigate-config
@@ -184,7 +178,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: democratic-csi-logos-nfs-media
+  storageClassName: ""
   volumeName: frigate-media
   resources:
     requests:
@@ -199,7 +193,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: democratic-csi-logos-nfs-media
+  storageClassName: ""
   volumeName: frigate-config
   resources:
     requests:
