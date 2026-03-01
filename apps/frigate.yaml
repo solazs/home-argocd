@@ -93,14 +93,10 @@ spec:
         persistence:
           media:
             enabled: true
-            storageClass: democratic-csi-logos-nfs-media
-            size: 1Ti
-            nameOverride: frigate-media
+            existingClaim: frigate-media
           config:
             enabled: true
-            storageClass: democratic-csi-logos-nfs-media
-            size: 1Gi
-            nameOverride: frigate-config
+            existingClaim: frigate-config
             
         tolerations:
           - key: "intel.feature.node.kubernetes.io/gpu"
@@ -128,6 +124,86 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+---
+# Static PV for Frigate media — references logos/frigate/media ZFS dataset
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: frigate-media
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: democratic-csi-logos-nfs-media
+  mountOptions:
+    - noatime
+    - nfsvers=4.2
+  csi:
+    driver: org.democratic-csi.nfs-logos
+    volumeHandle: logos/frigate/media
+    volumeAttributes:
+      server: 192.168.13.100
+      share: /logos/frigate/media
+  claimRef:
+    namespace: frigate
+    name: frigate-media
+---
+# Static PV for Frigate config — references logos/frigate/config ZFS dataset
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: frigate-config
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: democratic-csi-logos-nfs-media
+  mountOptions:
+    - noatime
+    - nfsvers=4.2
+  csi:
+    driver: org.democratic-csi.nfs-logos
+    volumeHandle: logos/frigate/config
+    volumeAttributes:
+      server: 192.168.13.100
+      share: /logos/frigate/config
+  claimRef:
+    namespace: frigate
+    name: frigate-config
+---
+# Static PVC for Frigate media
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: frigate-media
+  namespace: frigate
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: democratic-csi-logos-nfs-media
+  volumeName: frigate-media
+  resources:
+    requests:
+      storage: 1Ti
+---
+# Static PVC for Frigate config
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: frigate-config
+  namespace: frigate
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: democratic-csi-logos-nfs-media
+  volumeName: frigate-config
+  resources:
+    requests:
+      storage: 1Gi
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
