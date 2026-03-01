@@ -95,10 +95,12 @@ spec:
             enabled: true
             storageClass: democratic-csi-logos-nfs-media
             size: 1Ti
+            nameOverride: frigate-media
           config:
             enabled: true
             storageClass: democratic-csi-logos-nfs-media
             size: 1Gi
+            nameOverride: frigate-config
             
         tolerations:
           - key: "intel.feature.node.kubernetes.io/gpu"
