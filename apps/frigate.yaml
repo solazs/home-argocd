@@ -130,20 +130,25 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: frigate-media
-  namespace: frigate
 spec:
   capacity:
     storage: 1Ti
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: ""
+  storageClassName: democratic-csi-logos-nfs-media
   mountOptions:
     - noatime
     - nfsvers=4.2
-  nfs:
-    server: 192.168.13.100
-    path: /logos/frigate/media
+  csi:
+    driver: org.democratic-csi.nfs-logos
+    fsType: nfs
+    volumeHandle: logos/frigate/media
+    volumeAttributes:
+      node_attach_driver: nfs
+      provisioner_driver: zfs-generic-nfs
+      server: 192.168.13.100
+      share: /logos/frigate/media
   claimRef:
     namespace: frigate
     name: frigate-media
@@ -153,20 +158,25 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: frigate-config
-  namespace: frigate
 spec:
   capacity:
     storage: 1Gi
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: ""
+  storageClassName: democratic-csi-logos-nfs-media
   mountOptions:
     - noatime
     - nfsvers=4.2
-  nfs:
-    server: 192.168.13.100
-    path: /logos/frigate/config
+  csi:
+    driver: org.democratic-csi.nfs-logos
+    fsType: nfs
+    volumeHandle: logos/frigate/config
+    volumeAttributes:
+      node_attach_driver: nfs
+      provisioner_driver: zfs-generic-nfs
+      server: 192.168.13.100
+      share: /logos/frigate/config
   claimRef:
     namespace: frigate
     name: frigate-config
@@ -179,8 +189,8 @@ metadata:
   namespace: frigate
 spec:
   accessModes:
-    - ReadWriteMany
-  storageClassName: ""
+    - ReadWriteOnce
+  storageClassName: democratic-csi-logos-nfs-media
   volumeName: frigate-media
   resources:
     requests:
@@ -194,8 +204,8 @@ metadata:
   namespace: frigate
 spec:
   accessModes:
-    - ReadWriteMany
-  storageClassName: ""
+    - ReadWriteOnce
+  storageClassName: democratic-csi-logos-nfs-media
   volumeName: frigate-config
   resources:
     requests:
