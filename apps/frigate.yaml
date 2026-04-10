@@ -58,6 +58,12 @@ spec:
       values: |
         image:
           tag: "0.17.1"
+
+        securityContext:
+          capabilities:
+            add:
+              - PERFMON # Required for Intel GPU performance monitoring
+
         # Multus network annotations to attach the secondary interfaces with STATIC MACs
         podAnnotations:
           k8s.v1.cni.cncf.io/networks: |-
