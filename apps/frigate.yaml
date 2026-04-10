@@ -80,16 +80,6 @@ spec:
         ffmpeg:
           hwaccel_args: preset-vaapi
 
-        #service:
-        #  main:
-        #    ports:
-        #      http:
-        #        port: 5000
-        #      rtsp:
-        #        enabled: true
-        #        port: 8554
-        #        protocol: TCP
-
         persistence:
           media:
             enabled: true
@@ -97,7 +87,70 @@ spec:
           config:
             enabled: true
             existingClaim: frigate-config
-            ephemeralWritableConfigYaml: false  # Disable copyconfig init container — config.yml on PVC is authoritative
+            # ephemeralWritableConfigYaml defaults to true: init container seeds config from
+            # Helm values on every pod restart. UI edits persist between restarts but are
+            # reset on restart. To permanently save UI changes, update the config: block below.
+
+        config: |
+          mqtt:
+            enabled: true
+            host: 192.168.12.200
+            port: 1883
+            topic_prefix: frigate
+            client_id: frigate
+            user: frigate
+            password: "{FRIGATE_MQTT_PASSWORD}"
+            stats_interval: 60
+
+          go2rtc:
+            streams:
+              hikvision_main:
+                - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.101:554/Streaming/Channels/101
+              hikvision_sub:
+                - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.101:554/Streaming/Channels/102
+
+          detectors:
+            ov:
+              type: openvino
+              device: AUTO
+
+          cameras:
+            hikvision:
+              ffmpeg:
+                inputs:
+                  - path: rtsp://127.0.0.1:8554/hikvision_sub
+                    input_args: preset-rtsp-restream
+                    roles:
+                      - detect
+                  - path: rtsp://127.0.0.1:8554/hikvision_main
+                    input_args: preset-rtsp-restream
+                    roles:
+                      - record
+              detect:
+                enabled: true
+                width: 1280
+                height: 720
+                fps: 5
+              record:
+                enabled: true
+                motion:
+                  days: 7
+                alerts:
+                  retain:
+                    days: 14
+                    mode: all
+                detections:
+                  retain:
+                    days: 14
+                    mode: all
+              snapshots:
+                enabled: true
+                retain:
+                  default: 14
+              objects:
+                track:
+                  - person
+                  - car
             
         tolerations:
           - key: "intel.feature.node.kubernetes.io/gpu"
