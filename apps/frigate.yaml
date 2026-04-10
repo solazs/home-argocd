@@ -94,13 +94,10 @@ spec:
         config: |
           mqtt:
             enabled: true
-            host: 192.168.12.200
+            host: 192.168.13.200
             port: 1883
-            topic_prefix: frigate
-            client_id: frigate
             user: frigate
             password: "{FRIGATE_MQTT_PASSWORD}"
-            stats_interval: 60
 
           go2rtc:
             streams:
