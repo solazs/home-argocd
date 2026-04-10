@@ -104,25 +104,36 @@ spec:
 
           go2rtc:
             streams:
-              hikvision_main:
+              hik_utca_main:
                 - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.101:554/Streaming/Channels/101
-              hikvision_sub:
+              hik_utca_sub:
                 - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.101:554/Streaming/Channels/102
 
           detectors:
-            ov:
+            ov_gpu:
               type: openvino
-              device: AUTO
+              device: GPU
+            ov_npu:
+              type: openvino
+              device: NPU
+          
+          model:
+            width: 300
+            height: 300
+            input_tensor: nhwc
+            input_pixel_format: bgr
+            path: /openvino-model/ssdlite_mobilenet_v2.xml
+            labelmap_path: /openvino-model/coco_91cl_bkgr.txt
 
           cameras:
-            hikvision:
+            hik_utca:
               ffmpeg:
                 inputs:
-                  - path: rtsp://127.0.0.1:8554/hikvision_sub
+                  - path: rtsp://127.0.0.1:8554/hik_utca_sub
                     input_args: preset-rtsp-restream
                     roles:
                       - detect
-                  - path: rtsp://127.0.0.1:8554/hikvision_main
+                  - path: rtsp://127.0.0.1:8554/hik_utca_main
                     input_args: preset-rtsp-restream
                     roles:
                       - record
