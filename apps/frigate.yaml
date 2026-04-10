@@ -106,6 +106,8 @@ spec:
             password: "{FRIGATE_MQTT_PASSWORD}"
 
           go2rtc:
+            webrtc:
+              listen: "0.0.0.0:8555"
             streams:
               hik_utca_main:
                 - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.101:554/Streaming/Channels/101
@@ -165,6 +167,10 @@ spec:
                 track:
                   - person
                   - car
+                  - dog
+                  - package
+                  - dpd
+                  - gls
             
         tolerations:
           - key: "intel.feature.node.kubernetes.io/gpu"
