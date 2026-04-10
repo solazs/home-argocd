@@ -107,7 +107,11 @@ spec:
 
           go2rtc:
             webrtc:
-              listen: "0.0.0.0:8555"
+              listen: ":8555"
+              filters:
+                networks:
+                  - udp4
+                  - tcp4
             streams:
               hik_utca_main:
                 - rtsp://{FRIGATE_CAMERA_USER}:{FRIGATE_CAMERA_PASSWORD}@192.168.55.101:554/Streaming/Channels/101
