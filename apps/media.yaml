@@ -419,7 +419,7 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: qbittorrent
+        - name: qbittorrent-main
           port: 8080
 
 ---
