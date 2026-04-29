@@ -797,7 +797,7 @@ spec:
             containers:
               main:
                 image:
-                  repository: seerr/seerr
+                  repository: ghcr.io/seerr-team/seerr
                   tag: "3.2.0"
                 env:
                   TZ: Europe/Budapest
