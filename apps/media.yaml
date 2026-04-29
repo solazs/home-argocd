@@ -827,14 +827,14 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: jellyfin
+        - name: jellyfin-main
           port: 8096
 
 ---
 # =============================================================================
 # Seerr — Media request portal
 # WebUI: port 5055
-# Connects to: Jellyfin (http://jellyfin.media.svc.cluster.local:8096)
+# Connects to: Jellyfin (http://jellyfin-main.media.svc.cluster.local:8096)
 #              Radarr   (http://radarr.media.svc.cluster.local:7878)
 #              Sonarr   (http://sonarr.media.svc.cluster.local:8989)
 # =============================================================================
