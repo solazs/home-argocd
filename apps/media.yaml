@@ -352,7 +352,7 @@ spec:
               main:
                 image:
                   repository: lscr.io/linuxserver/qbittorrent
-                  tag: "5.1.0"
+                  tag: "5.1.4"
                 env:
                   PUID: "1000"
                   PGID: "1000"
@@ -440,7 +440,7 @@ spec:
               main:
                 image:
                   repository: lscr.io/linuxserver/prowlarr
-                  tag: "1.30.2"
+                  tag: "2.3.5"
                 env:
                   PUID: "1000"
                   PGID: "1000"
@@ -524,7 +524,7 @@ spec:
               main:
                 image:
                   repository: lscr.io/linuxserver/radarr
-                  tag: "5.22.4"
+                  tag: "6.1.1"
                 env:
                   PUID: "1000"
                   PGID: "1000"
@@ -613,7 +613,7 @@ spec:
               main:
                 image:
                   repository: lscr.io/linuxserver/sonarr
-                  tag: "4.0.14"
+                  tag: "4.0.17"
                 env:
                   PUID: "1000"
                   PGID: "1000"
@@ -798,7 +798,7 @@ spec:
               main:
                 image:
                   repository: fallenbagel/jellyseerr
-                  tag: "2.5.2"
+                  tag: "3.2.0"
                 env:
                   TZ: Europe/Budapest
                   # LOG_LEVEL: debug  # Uncomment for troubleshooting
