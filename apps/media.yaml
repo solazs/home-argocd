@@ -219,6 +219,32 @@ spec:
     name: media-data
 
 ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jellyfin-cache
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-media
+  local:
+    path: /logos/jellyfin-cache
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - carrier
+  claimRef:
+    namespace: media
+    name: jellyfin-cache
+
+---
 # =============================================================================
 # Config PersistentVolumeClaims
 # =============================================================================
@@ -321,6 +347,21 @@ spec:
   resources:
     requests:
       storage: 20Ti
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-cache
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-media
+  volumeName: jellyfin-cache
+  resources:
+    requests:
+      storage: 100Gi
 
 ---
 # =============================================================================
@@ -732,6 +773,13 @@ spec:
             ports:
               http:
                 port: 8096
+          discovery:
+            controller: main
+            type: LoadBalancer
+            ports:
+              discovery:
+                port: 7359
+                protocol: UDP
 
         persistence:
           config:
@@ -744,6 +792,11 @@ spec:
             existingClaim: media-data
             globalMounts:
               - path: /data
+          cache:
+            type: persistentVolumeClaim
+            existingClaim: jellyfin-cache
+            globalMounts:
+              - path: /cache
 
   destination:
     server: https://kubernetes.default.svc
