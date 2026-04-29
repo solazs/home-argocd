@@ -708,10 +708,6 @@ spec:
                   tag: "10.11.8"
                 env:
                   TZ: Europe/Budapest
-                  JELLYFIN_DATA_DIR: /config/data
-                  JELLYFIN_CONFIG_DIR: /config
-                  JELLYFIN_LOG_DIR: /config/log
-                  JELLYFIN_CACHE_DIR: /config/cache
                 resources:
                   requests:
                     nvidia.com/gpu: "1"
