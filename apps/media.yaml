@@ -688,46 +688,54 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://jellyfin.github.io/jellyfin-helm
-    chart: jellyfin
-    targetRevision: "3.2.0"
+    repoURL: https://bjw-s-labs.github.io/helm-charts/
+    chart: app-template
+    targetRevision: 4.6.2
     helm:
       valuesObject:
-        image:
-          tag: "10.11.8"
+        defaultPodOptions:
+          nodeSelector:
+            kubernetes.io/hostname: carrier
+          # Enable NVIDIA runtime for GPU transcoding
+          runtimeClassName: nvidia
 
-        # Pin to carrier for NVIDIA GPU access
-        nodeSelector:
-          kubernetes.io/hostname: carrier
+        controllers:
+          main:
+            containers:
+              main:
+                image:
+                  repository: jellyfin/jellyfin
+                  tag: "10.11.8"
+                env:
+                  TZ: Europe/Budapest
+                  JELLYFIN_DATA_DIR: /config/data
+                  JELLYFIN_CONFIG_DIR: /config
+                  JELLYFIN_LOG_DIR: /config/log
+                  JELLYFIN_CACHE_DIR: /config/cache
+                resources:
+                  requests:
+                    nvidia.com/gpu: "1"
+                  limits:
+                    nvidia.com/gpu: "1"
 
-        # Enable NVIDIA runtime for GPU transcoding
-        runtimeClassName: nvidia
-
-        resources:
-          requests:
-            nvidia.com/gpu: "1"
-          limits:
-            nvidia.com/gpu: "1"
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 8096
 
         persistence:
           config:
-            enabled: true
+            type: persistentVolumeClaim
             existingClaim: jellyfin-config
-
-        # Mount the shared media-data volume at /data
-        # Jellyfin libraries will be added as /data/movies and /data/tv
-        extraVolumes:
-          - name: media-data
-            persistentVolumeClaim:
-              claimName: media-data
-
-        extraVolumeMounts:
-          - name: media-data
-            mountPath: /data
-
-        # Disable built-in Ingress; we use Envoy Gateway HTTPRoute below
-        ingress:
-          enabled: false
+            globalMounts:
+              - path: /config
+          data:
+            type: persistentVolumeClaim
+            existingClaim: media-data
+            globalMounts:
+              - path: /data
 
   destination:
     server: https://kubernetes.default.svc
