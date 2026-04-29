@@ -25,7 +25,7 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-          
+
     - name: https-frigate
       protocol: HTTPS
       port: 443
@@ -39,7 +39,7 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
- 
+
     - name: https-radarr
       protocol: HTTPS
       port: 443
@@ -110,14 +110,14 @@ spec:
         namespaces:
           from: All
 
-    - name: https-jellyseerr
+    - name: https-seerr
       protocol: HTTPS
       port: 443
-      hostname: "jellyseerr.home.solazs.hu"
+      hostname: "seerr.home.solazs.hu"
       tls:
         mode: Terminate
         certificateRefs:
-          - name: jellyseerr-server-tls
+          - name: seerr-server-tls
             kind: Secret
             group: ""
       allowedRoutes:

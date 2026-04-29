@@ -10,13 +10,13 @@
 #   /tavern/cinem/config/prowlarr/
 #   /tavern/cinem/config/qbittorrent/
 #   /tavern/cinem/config/jellyfin/
-#   /tavern/cinem/config/jellyseerr/
+#   /tavern/cinem/config/seerr/
 #   /tavern/cinem/data/downloads/
 #   /tavern/cinem/data/movies/
 #   /tavern/cinem/data/tv/
 #
 # Create these before syncing:
-#   mkdir -p /tavern/cinem/config/{radarr,sonarr,prowlarr,qbittorrent,jellyfin,jellyseerr}
+#   mkdir -p /tavern/cinem/config/{radarr,sonarr,prowlarr,qbittorrent,jellyfin,seerr}
 #   mkdir -p /tavern/cinem/data/{downloads,movies,tv}
 #   chown -R 1000:1000 /tavern/cinem/config /tavern/cinem/data
 # =============================================================================
@@ -165,7 +165,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: jellyseerr-config
+  name: seerr-config
 spec:
   capacity:
     storage: 2Gi
@@ -174,7 +174,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-media
   local:
-    path: /tavern/cinem/config/jellyseerr
+    path: /tavern/cinem/config/seerr
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -185,7 +185,7 @@ spec:
                 - carrier
   claimRef:
     namespace: media
-    name: jellyseerr-config
+    name: seerr-config
 
 ---
 # =============================================================================
@@ -296,13 +296,13 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: jellyseerr-config
+  name: seerr-config
   namespace: media
 spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: local-media
-  volumeName: jellyseerr-config
+  volumeName: seerr-config
   resources:
     requests:
       storage: 2Gi
@@ -767,7 +767,7 @@ spec:
 
 ---
 # =============================================================================
-# Jellyseerr — Media request portal
+# Seerr — Media request portal
 # WebUI: port 5055
 # Connects to: Jellyfin (http://jellyfin.media.svc.cluster.local:8096)
 #              Radarr   (http://radarr.media.svc.cluster.local:7878)
@@ -776,7 +776,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: jellyseerr
+  name: seerr
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -797,7 +797,7 @@ spec:
             containers:
               main:
                 image:
-                  repository: fallenbagel/jellyseerr
+                  repository: seerr/seerr
                   tag: "3.2.0"
                 env:
                   TZ: Europe/Budapest
@@ -813,7 +813,7 @@ spec:
         persistence:
           config:
             type: persistentVolumeClaim
-            existingClaim: jellyseerr-config
+            existingClaim: seerr-config
             globalMounts:
               - path: /app/config
 
@@ -832,19 +832,19 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: jellyseerr-route
+  name: seerr-route
   namespace: media
 spec:
   parentRefs:
     - name: home-gateway
       namespace: envoy-gateway-system
   hostnames:
-    - "jellyseerr.home.solazs.hu"
+    - "seerr.home.solazs.hu"
   rules:
     - matches:
         - path:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: jellyseerr
+        - name: seerr
           port: 5055
