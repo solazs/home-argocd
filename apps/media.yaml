@@ -1,0 +1,846 @@
+# =============================================================================
+# *Arr Media Stack — ArgoCD Applications
+# =============================================================================
+# All pods are pinned to node "carrier" (the only NVIDIA GPU node).
+# Storage uses local PVs backed by the /tavern/cinem ZFS dataset on carrier.
+#
+# Directory layout expected on carrier:
+#   /tavern/cinem/config/radarr/
+#   /tavern/cinem/config/sonarr/
+#   /tavern/cinem/config/prowlarr/
+#   /tavern/cinem/config/qbittorrent/
+#   /tavern/cinem/config/jellyfin/
+#   /tavern/cinem/config/jellyseerr/
+#   /tavern/cinem/data/downloads/
+#   /tavern/cinem/data/movies/
+#   /tavern/cinem/data/tv/
+#
+# Create these before syncing:
+#   mkdir -p /tavern/cinem/config/{radarr,sonarr,prowlarr,qbittorrent,jellyfin,jellyseerr}
+#   mkdir -p /tavern/cinem/data/{downloads,movies,tv}
+#   chown -R 1000:1000 /tavern/cinem/config /tavern/cinem/data
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# StorageClass — local NVMe/HDD volumes, no dynamic provisioner
+# -----------------------------------------------------------------------------
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-media
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Retain
+
+---
+# =============================================================================
+# Config PersistentVolumes (one per app, bound to carrier)
+# =============================================================================
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: radarr-config
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-media
+  local:
+    path: /tavern/cinem/config/radarr
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - carrier
+  claimRef:
+    namespace: media
+    name: radarr-config
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: sonarr-config
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-media
+  local:
+    path: /tavern/cinem/config/sonarr
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - carrier
+  claimRef:
+    namespace: media
+    name: sonarr-config
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: prowlarr-config
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-media
+  local:
+    path: /tavern/cinem/config/prowlarr
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - carrier
+  claimRef:
+    namespace: media
+    name: prowlarr-config
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: qbittorrent-config
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-media
+  local:
+    path: /tavern/cinem/config/qbittorrent
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - carrier
+  claimRef:
+    namespace: media
+    name: qbittorrent-config
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jellyfin-config
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-media
+  local:
+    path: /tavern/cinem/config/jellyfin
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - carrier
+  claimRef:
+    namespace: media
+    name: jellyfin-config
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jellyseerr-config
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-media
+  local:
+    path: /tavern/cinem/config/jellyseerr
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - carrier
+  claimRef:
+    namespace: media
+    name: jellyseerr-config
+
+---
+# =============================================================================
+# Shared data PV — /tavern/cinem/data mounted as /data in all *arr + qBit pods
+# RWO is fine: all pods are on the same node (carrier), multiple pods on one
+# node can share an RWO volume.
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: media-data
+spec:
+  capacity:
+    storage: 20Ti
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-media
+  local:
+    path: /tavern/cinem/data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - carrier
+  claimRef:
+    namespace: media
+    name: media-data
+
+---
+# =============================================================================
+# Config PersistentVolumeClaims
+# =============================================================================
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: radarr-config
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-media
+  volumeName: radarr-config
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sonarr-config
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-media
+  volumeName: sonarr-config
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prowlarr-config
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-media
+  volumeName: prowlarr-config
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: qbittorrent-config
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-media
+  volumeName: qbittorrent-config
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-config
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-media
+  volumeName: jellyfin-config
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyseerr-config
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-media
+  volumeName: jellyseerr-config
+  resources:
+    requests:
+      storage: 2Gi
+---
+# Shared data volume
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media-data
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-media
+  volumeName: media-data
+  resources:
+    requests:
+      storage: 20Ti
+
+---
+# =============================================================================
+# qBittorrent — Download client
+# WebUI: port 8080 | Torrent listener: 6881
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qbittorrent
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts/
+    chart: app-template
+    targetRevision: 4.6.2
+    helm:
+      valuesObject:
+        defaultPodOptions:
+          nodeSelector:
+            kubernetes.io/hostname: carrier
+
+        controllers:
+          main:
+            containers:
+              main:
+                image:
+                  repository: lscr.io/linuxserver/qbittorrent
+                  tag: "5.1.0"
+                env:
+                  PUID: "1000"
+                  PGID: "1000"
+                  TZ: Europe/Budapest
+                  WEBUI_PORT: "8080"
+
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 8080
+
+        persistence:
+          config:
+            type: persistentVolumeClaim
+            existingClaim: qbittorrent-config
+            globalMounts:
+              - path: /config
+          data:
+            type: persistentVolumeClaim
+            existingClaim: media-data
+            globalMounts:
+              - path: /data
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: qbittorrent-route
+  namespace: media
+spec:
+  parentRefs:
+    - name: home-gateway
+      namespace: envoy-gateway-system
+  hostnames:
+    - "qbittorrent.home.solazs.hu"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: qbittorrent
+          port: 8080
+
+---
+# =============================================================================
+# Prowlarr — Indexer manager (syncs indexers to Radarr + Sonarr)
+# WebUI: port 9696
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prowlarr
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts/
+    chart: app-template
+    targetRevision: 4.6.2
+    helm:
+      valuesObject:
+        defaultPodOptions:
+          nodeSelector:
+            kubernetes.io/hostname: carrier
+
+        controllers:
+          main:
+            containers:
+              main:
+                image:
+                  repository: lscr.io/linuxserver/prowlarr
+                  tag: "1.30.2"
+                env:
+                  PUID: "1000"
+                  PGID: "1000"
+                  TZ: Europe/Budapest
+
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 9696
+
+        persistence:
+          config:
+            type: persistentVolumeClaim
+            existingClaim: prowlarr-config
+            globalMounts:
+              - path: /config
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: prowlarr-route
+  namespace: media
+spec:
+  parentRefs:
+    - name: home-gateway
+      namespace: envoy-gateway-system
+  hostnames:
+    - "prowlarr.home.solazs.hu"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: prowlarr
+          port: 9696
+
+---
+# =============================================================================
+# Radarr — Movie automation
+# WebUI: port 7878
+# After deployment: set root folder to /data/movies, add qBittorrent as client,
+# connect Prowlarr as indexer source.
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: radarr
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts/
+    chart: app-template
+    targetRevision: 4.6.2
+    helm:
+      valuesObject:
+        defaultPodOptions:
+          nodeSelector:
+            kubernetes.io/hostname: carrier
+
+        controllers:
+          main:
+            containers:
+              main:
+                image:
+                  repository: lscr.io/linuxserver/radarr
+                  tag: "5.22.4"
+                env:
+                  PUID: "1000"
+                  PGID: "1000"
+                  TZ: Europe/Budapest
+
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 7878
+
+        persistence:
+          config:
+            type: persistentVolumeClaim
+            existingClaim: radarr-config
+            globalMounts:
+              - path: /config
+          data:
+            type: persistentVolumeClaim
+            existingClaim: media-data
+            globalMounts:
+              - path: /data
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: radarr-route
+  namespace: media
+spec:
+  parentRefs:
+    - name: home-gateway
+      namespace: envoy-gateway-system
+  hostnames:
+    - "radarr.home.solazs.hu"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: radarr
+          port: 7878
+
+---
+# =============================================================================
+# Sonarr — TV series automation
+# WebUI: port 8989
+# After deployment: set root folder to /data/tv, add qBittorrent as client,
+# connect Prowlarr as indexer source.
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sonarr
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts/
+    chart: app-template
+    targetRevision: 4.6.2
+    helm:
+      valuesObject:
+        defaultPodOptions:
+          nodeSelector:
+            kubernetes.io/hostname: carrier
+
+        controllers:
+          main:
+            containers:
+              main:
+                image:
+                  repository: lscr.io/linuxserver/sonarr
+                  tag: "4.0.14"
+                env:
+                  PUID: "1000"
+                  PGID: "1000"
+                  TZ: Europe/Budapest
+
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 8989
+
+        persistence:
+          config:
+            type: persistentVolumeClaim
+            existingClaim: sonarr-config
+            globalMounts:
+              - path: /config
+          data:
+            type: persistentVolumeClaim
+            existingClaim: media-data
+            globalMounts:
+              - path: /data
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: sonarr-route
+  namespace: media
+spec:
+  parentRefs:
+    - name: home-gateway
+      namespace: envoy-gateway-system
+  hostnames:
+    - "sonarr.home.solazs.hu"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: sonarr
+          port: 8989
+
+---
+# =============================================================================
+# Jellyfin — Media server
+# WebUI: port 8096
+# Pinned to carrier for NVIDIA GTX 1060 6GB (CUDA 6.1, Pascal).
+# runtimeClassName: nvidia enables GPU access via the NVIDIA GPU operator.
+# Jellyfin library paths: /data/movies and /data/tv
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: jellyfin
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://jellyfin.github.io/jellyfin-helm
+    chart: jellyfin
+    targetRevision: "3.2.0"
+    helm:
+      valuesObject:
+        image:
+          tag: "10.11.8"
+
+        # Pin to carrier for NVIDIA GPU access
+        nodeSelector:
+          kubernetes.io/hostname: carrier
+
+        # Enable NVIDIA runtime for GPU transcoding
+        runtimeClassName: nvidia
+
+        resources:
+          requests:
+            nvidia.com/gpu: "1"
+          limits:
+            nvidia.com/gpu: "1"
+
+        persistence:
+          config:
+            enabled: true
+            existingClaim: jellyfin-config
+
+        # Mount the shared media-data volume at /data
+        # Jellyfin libraries will be added as /data/movies and /data/tv
+        extraVolumes:
+          - name: media-data
+            persistentVolumeClaim:
+              claimName: media-data
+
+        extraVolumeMounts:
+          - name: media-data
+            mountPath: /data
+
+        # Disable built-in Ingress; we use Envoy Gateway HTTPRoute below
+        ingress:
+          enabled: false
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: jellyfin-route
+  namespace: media
+spec:
+  parentRefs:
+    - name: home-gateway
+      namespace: envoy-gateway-system
+  hostnames:
+    - "jellyfin.home.solazs.hu"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: jellyfin
+          port: 8096
+
+---
+# =============================================================================
+# Jellyseerr — Media request portal
+# WebUI: port 5055
+# Connects to: Jellyfin (http://jellyfin.media.svc.cluster.local:8096)
+#              Radarr   (http://radarr.media.svc.cluster.local:7878)
+#              Sonarr   (http://sonarr.media.svc.cluster.local:8989)
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: jellyseerr
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts/
+    chart: app-template
+    targetRevision: 4.6.2
+    helm:
+      valuesObject:
+        defaultPodOptions:
+          nodeSelector:
+            kubernetes.io/hostname: carrier
+
+        controllers:
+          main:
+            containers:
+              main:
+                image:
+                  repository: fallenbagel/jellyseerr
+                  tag: "2.5.2"
+                env:
+                  TZ: Europe/Budapest
+                  # LOG_LEVEL: debug  # Uncomment for troubleshooting
+
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 5055
+
+        persistence:
+          config:
+            type: persistentVolumeClaim
+            existingClaim: jellyseerr-config
+            globalMounts:
+              - path: /app/config
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: jellyseerr-route
+  namespace: media
+spec:
+  parentRefs:
+    - name: home-gateway
+      namespace: envoy-gateway-system
+  hostnames:
+    - "jellyseerr.home.solazs.hu"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: jellyseerr
+          port: 5055

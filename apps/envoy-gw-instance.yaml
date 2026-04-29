@@ -40,6 +40,90 @@ spec:
         namespaces:
           from: All
  
+    - name: https-radarr
+      protocol: HTTPS
+      port: 443
+      hostname: "radarr.home.solazs.hu"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: radarr-server-tls
+            kind: Secret
+            group: ""
+      allowedRoutes:
+        namespaces:
+          from: All
+
+    - name: https-sonarr
+      protocol: HTTPS
+      port: 443
+      hostname: "sonarr.home.solazs.hu"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: sonarr-server-tls
+            kind: Secret
+            group: ""
+      allowedRoutes:
+        namespaces:
+          from: All
+
+    - name: https-prowlarr
+      protocol: HTTPS
+      port: 443
+      hostname: "prowlarr.home.solazs.hu"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: prowlarr-server-tls
+            kind: Secret
+            group: ""
+      allowedRoutes:
+        namespaces:
+          from: All
+
+    - name: https-qbittorrent
+      protocol: HTTPS
+      port: 443
+      hostname: "qbittorrent.home.solazs.hu"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: qbittorrent-server-tls
+            kind: Secret
+            group: ""
+      allowedRoutes:
+        namespaces:
+          from: All
+
+    - name: https-jellyfin
+      protocol: HTTPS
+      port: 443
+      hostname: "jellyfin.home.solazs.hu"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: jellyfin-server-tls
+            kind: Secret
+            group: ""
+      allowedRoutes:
+        namespaces:
+          from: All
+
+    - name: https-jellyseerr
+      protocol: HTTPS
+      port: 443
+      hostname: "jellyseerr.home.solazs.hu"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: jellyseerr-server-tls
+            kind: Secret
+            group: ""
+      allowedRoutes:
+        namespaces:
+          from: All
+
     - name: rtsp-listener
       protocol: TCP
       port: 8554
