@@ -51,7 +51,7 @@ spec:
     kubernetes:
       envoyService:
         type: LoadBalancer
-        externalTrafficPolicy: Cluster
+        externalTrafficPolicy: Local
         annotations:
           io.cilium/lb-ipam-ips: "192.168.13.232"
         labels:

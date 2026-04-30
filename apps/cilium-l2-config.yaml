@@ -11,7 +11,5 @@ kind: CiliumL2AnnouncementPolicy
 metadata:
   name: vlan13-announcement-policy
 spec:
-  interfaces:
-    - "^vlan13-home$"
   loadBalancerIPs: true
   externalIPs: true
