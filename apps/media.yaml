@@ -773,13 +773,6 @@ spec:
             ports:
               http:
                 port: 8096
-          discovery:
-            controller: main
-            type: LoadBalancer
-            ports:
-              discovery:
-                port: 7359
-                protocol: UDP
 
         persistence:
           config:
