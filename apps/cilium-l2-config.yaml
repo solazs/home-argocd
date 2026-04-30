@@ -11,6 +11,10 @@ kind: CiliumL2AnnouncementPolicy
 metadata:
   name: vlan13-announcement-policy
 spec:
+  nodeSelector:
+    matchLabels: {}
+  serviceSelector:
+    matchLabels: {}
   interfaces:
     - "^vlan13-home$"
   loadBalancerIPs: true
